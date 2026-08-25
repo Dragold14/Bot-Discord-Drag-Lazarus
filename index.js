@@ -136,16 +136,23 @@ const REQUEST_TYPES = {
 // SAUVEGARDE DES CONTESTATIONS
 // ============================================================
 
+const DATA_DIR =
+  process.env.RAILWAY_VOLUME_MOUNT_PATH ||
+  __dirname;
+
+fs.mkdirSync(DATA_DIR, {
+  recursive: true,
+});
+
 const STATE_FILE = path.join(
-  __dirname,
+  DATA_DIR,
   "contestations.json"
 );
 
 const STATE_BACKUP_FILE = path.join(
-  __dirname,
+  DATA_DIR,
   "contestations.backup.json"
 );
-
 let contestState = {
   records: {},
   activeByUser: {},
