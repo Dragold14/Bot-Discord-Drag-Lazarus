@@ -7,15 +7,27 @@ const { fetchRecordedThread } = require("../services/discord");
 const { buildIncomingContestComponent } = require("../ui/contests");
 const { buildNoActiveContestDM } = require("../ui/notifications");
 
+// ============================================================
+// DEBUG CLEAR — DM
+// ============================================================
+
 async function debugClear(client, message) {
   const guild = client.guilds.cache.get(GUILD_ID);
+
   const member = guild
     ? await guild.members.fetch(message.author.id).catch(() => null)
     : null;
+
   if (!isAnyStaff(member)) return;
 
-  const messages = await message.channel.messages.fetch({ limit: 100 });
-  const botMessages = messages.filter((msg) => msg.author.id === client.user.id);
+  const messages = await message.channel.messages.fetch({
+    limit: 100,
+  });
+
+  const botMessages = messages.filter(
+    (msg) => msg.author.id === client.user.id
+  );
+
   let deletedCount = 0;
 
   for (const botMessage of botMessages.values()) {
@@ -28,53 +40,80 @@ async function debugClear(client, message) {
   const confirmation = await message.channel.send(
     `🧹 Nettoyage terminé — ${deletedCount} message(s) du bot supprimé(s).`
   );
-  setTimeout(() => confirmation.delete().catch(() => {}), 3000);
+
+  setTimeout(
+    () => confirmation.delete().catch(() => {}),
+    3000
+  );
 }
 
 // ============================================================
-// DEBUGKICK — RESET DES RÔLES
+// DEBUG KICK — RESET DES RÔLES
 // ============================================================
 
-if (message.content.toLowerCase().startsWith("!debugkick")) {
-  if (!message.guild) return;
+async function debugKick(message) {
+  if (!message.guild) return false;
 
-  // Commande réservée au propriétaire du serveur
-  if (message.author.id !== message.guild.ownerId) {
-    await message.reply("❌ Cette commande est réservée au propriétaire du serveur.");
-    return;
+  if (
+    !message.content
+      .trim()
+      .toLowerCase()
+      .startsWith("!debugkick")
+  ) {
+    return false;
+  }
+
+  // Propriétaire du serveur uniquement
+  if (
+    message.author.id !==
+    message.guild.ownerId
+  ) {
+    await message.reply(
+      "❌ Cette commande est réservée au propriétaire du serveur."
+    );
+
+    return true;
   }
 
   const target =
-    message.mentions.members.first() ||
-    message.member;
+    message.mentions.members.first();
 
   if (!target) {
-    await message.reply("❌ Membre introuvable.");
-    return;
+    await message.reply(
+      "❌ Utilisation : `!debugkick @membre`"
+    );
+
+    return true;
   }
 
   // Discord interdit au bot de modifier le propriétaire
-  if (target.id === message.guild.ownerId) {
+  if (
+    target.id ===
+    message.guild.ownerId
+  ) {
     await message.reply(
       "❌ Discord interdit au bot de modifier les rôles du propriétaire du serveur."
     );
-    return;
+
+    return true;
   }
 
-  // On garde uniquement les rôles que Discord autorise le bot à retirer.
-  // @everyone et les rôles gérés par des intégrations/bots sont ignorés.
-  const removableRoles = target.roles.cache.filter(
-    (role) =>
-      role.id !== message.guild.id &&
-      !role.managed &&
-      role.editable
-  );
+  const removableRoles =
+    target.roles.cache.filter(
+      (role) =>
+        role.id !== message.guild.id &&
+        !role.managed &&
+        role.editable
+    );
 
-  if (removableRoles.size === 0) {
+  if (
+    removableRoles.size === 0
+  ) {
     await message.reply(
       `⚠️ Aucun rôle retirable trouvé sur ${target}.`
     );
-    return;
+
+    return true;
   }
 
   try {
@@ -85,7 +124,7 @@ if (message.content.toLowerCase().startsWith("!debugkick")) {
 
     await message.reply(
       [
-        `✅ **RESET TERMINÉ**`,
+        "✅ **RESET TERMINÉ**",
         `Membre : ${target}`,
         `Rôles retirés : **${removableRoles.size}**`,
       ].join("\n")
@@ -95,75 +134,194 @@ if (message.content.toLowerCase().startsWith("!debugkick")) {
       `[DEBUGKICK] ${message.author.tag} a retiré ${removableRoles.size} rôle(s) à ${target.user.tag}.`
     );
   } catch (error) {
-    console.error("[DEBUGKICK] Erreur :", error);
+    console.error(
+      "[DEBUGKICK] Erreur :",
+      error
+    );
 
     await message.reply(
       "❌ Impossible de retirer tous les rôles. Vérifie la hiérarchie du rôle du bot."
     );
   }
 
-  return;
+  return true;
 }
 
-async function handleDirectMessage(client, message) {
-  try {
-    if (message.author.bot || message.guild) return;
+// ============================================================
+// MESSAGE SERVEUR
+// ============================================================
 
-    if (message.content.trim().toLowerCase() === "!debugclear") {
-      await debugClear(client, message).catch((error) => {
-        console.error("[DEBUG CLEAR] Erreur :", error);
-      });
+async function handleGuildMessage(
+  client,
+  message
+) {
+  try {
+    if (
+      message.author.bot ||
+      !message.guild
+    ) {
       return;
     }
 
-    if (!message.content.trim() && message.attachments.size === 0) return;
+    const handledDebugKick =
+      await debugKick(message);
 
-    const activeKey = contestState.activeByUser[message.author.id];
+    if (handledDebugKick) {
+      return;
+    }
+  } catch (error) {
+    console.error(
+      "[GUILD MESSAGE] Erreur :",
+      error
+    );
+  }
+}
+
+// ============================================================
+// MESSAGES PRIVÉS / CONTESTATIONS
+// ============================================================
+
+async function handleDirectMessage(
+  client,
+  message
+) {
+  try {
+    if (
+      message.author.bot ||
+      message.guild
+    ) {
+      return;
+    }
+
+    if (
+      message.content
+        .trim()
+        .toLowerCase() ===
+      "!debugclear"
+    ) {
+      await debugClear(
+        client,
+        message
+      ).catch((error) => {
+        console.error(
+          "[DEBUG CLEAR] Erreur :",
+          error
+        );
+      });
+
+      return;
+    }
+
+    if (
+      !message.content.trim() &&
+      message.attachments.size === 0
+    ) {
+      return;
+    }
+
+    const activeKey =
+      contestState.activeByUser[
+        message.author.id
+      ];
+
     if (!activeKey) {
       await message.author
         .send({
-          components: [buildNoActiveContestDM()],
-          flags: MessageFlags.IsComponentsV2,
+          components: [
+            buildNoActiveContestDM(),
+          ],
+          flags:
+            MessageFlags.IsComponentsV2,
         })
         .catch(() => {});
+
       return;
     }
 
-    const record = contestState.records[activeKey];
-    if (!record || record.status !== "open") {
-      delete contestState.activeByUser[message.author.id];
+    const record =
+      contestState.records[
+        activeKey
+      ];
+
+    if (
+      !record ||
+      record.status !== "open"
+    ) {
+      delete contestState
+        .activeByUser[
+        message.author.id
+      ];
+
       saveContestState();
+
       await message.author
         .send({
-          components: [buildNoActiveContestDM()],
-          flags: MessageFlags.IsComponentsV2,
+          components: [
+            buildNoActiveContestDM(),
+          ],
+          flags:
+            MessageFlags.IsComponentsV2,
         })
         .catch(() => {});
+
       return;
     }
 
-    const thread = await fetchRecordedThread(client, record);
-    if (!thread || thread.locked) {
+    const thread =
+      await fetchRecordedThread(
+        client,
+        record
+      );
+
+    if (
+      !thread ||
+      thread.locked
+    ) {
       record.status = "closed";
-      delete contestState.activeByUser[message.author.id];
+
+      delete contestState
+        .activeByUser[
+        message.author.id
+      ];
+
       saveContestState();
+
       await message.author
         .send({
-          components: [buildNoActiveContestDM()],
-          flags: MessageFlags.IsComponentsV2,
+          components: [
+            buildNoActiveContestDM(),
+          ],
+          flags:
+            MessageFlags.IsComponentsV2,
         })
         .catch(() => {});
+
       return;
     }
 
-    if (thread.archived) await thread.setArchived(false).catch(() => {});
+    if (thread.archived) {
+      await thread
+        .setArchived(false)
+        .catch(() => {});
+    }
 
-    const content = message.content.trim()
-      ? safeText(message.content.trim(), 1800)
-      : "*Pièce jointe uniquement.*";
-    const attachments = [...message.attachments.values()].map(
+    const content =
+      message.content.trim()
+        ? safeText(
+            message.content.trim(),
+            1800
+          )
+        : "*Pièce jointe uniquement.*";
+
+    const attachments = [
+      ...message.attachments.values(),
+    ].map(
       (attachment) =>
-        `[${safeText(attachment.name || "Pièce jointe", 120)}](${attachment.url})`
+        `[${safeText(
+          attachment.name ||
+            "Pièce jointe",
+          120
+        )}](${attachment.url})`
     );
 
     await thread.send({
@@ -175,14 +333,31 @@ async function handleDirectMessage(client, message) {
           record.requestId
         ),
       ],
-      flags: MessageFlags.IsComponentsV2,
-      allowedMentions: { parse: [] },
+
+      flags:
+        MessageFlags.IsComponentsV2,
+
+      allowedMentions: {
+        parse: [],
+      },
     });
 
-    await message.react("📩").catch(() => {});
+    await message
+      .react("📩")
+      .catch(() => {});
   } catch (error) {
-    console.error("[DM] Erreur :", error);
+    console.error(
+      "[DM] Erreur :",
+      error
+    );
   }
 }
 
-module.exports = { handleDirectMessage };
+// ============================================================
+// EXPORTS
+// ============================================================
+
+module.exports = {
+  handleDirectMessage,
+  handleGuildMessage,
+};

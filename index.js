@@ -4,16 +4,28 @@ const { client } = require("./src/client");
 const { registerCommands } = require("./src/registerCommands");
 const { auditRequestChannelSecurity } = require("./src/services/discord");
 const { handleInteraction } = require("./src/handlers/interactions");
-const { handleDirectMessage } = require("./src/handlers/messages");
+const { handleDirectMessage, handleGuildMessage,} = require("./src/handlers/messages");
 const { DISCORD_TOKEN } = require("./src/config");
 
 client.on(Events.InteractionCreate, (interaction) =>
   handleInteraction(client, interaction)
 );
 
-client.on(Events.MessageCreate, (message) =>
-  handleDirectMessage(client, message)
-);
+client.on("messageCreate", async (message) => {
+  if (message.guild) {
+    await handleGuildMessage(
+      client,
+      message
+    );
+
+    return;
+  }
+
+  await handleDirectMessage(
+    client,
+    message
+  );
+});
 
 client.once(Events.ClientReady, async (readyClient) => {
   console.log(`[READY] Connecté en tant que ${readyClient.user.tag}.`);
