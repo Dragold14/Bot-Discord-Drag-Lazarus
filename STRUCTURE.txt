@@ -1,0 +1,32 @@
+index.js
+src/
+  catalog/
+    factory.js
+    groups.js
+    index.js
+    major.js
+    ranks.js
+    specializations.js
+  client.js
+  config.js
+  forms.js
+  helpers.js
+  locks.js
+  permissions.js
+  registerCommands.js
+  state.js
+  handlers/
+    contestInteractions.js
+    interactions.js
+    messages.js
+    requestInteractions.js
+  services/
+    contests.js
+    discord.js
+    roles.js
+  ui/
+    contests.js
+    modals.js
+    notifications.js
+    panel.js
+    requests.js
