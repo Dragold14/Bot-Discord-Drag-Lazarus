@@ -38,27 +38,9 @@ function getRequestFields(request, context = {}) {
   if (request.formType === "staff") {
     return [
       {
-        id: "nom_prenom",
-        label: "Prénom / Nom",
-        placeholder: "Ex : [Simon Riley]",
-      },
-      {
-        id: "matricule",
-        label: "Matricule",
-        placeholder: "Ex : [0000]",
-      },
-      {
-        id: "nom_code",
-        label: "Nom de code (facultatif)",
-        placeholder: 'Ex : ["Ghost"]',
-        required: false,
-      },
-      {
-        id: "motivation",
-        label: "Motivation / expérience",
-        placeholder: "Expliquez pourquoi vous souhaitez rejoindre le Staff...",
-        style: "paragraph",
-        maxLength: 1200,
+        id: "Pseudo Staff",
+        label: "Pseudo Staff",
+        placeholder: "Ex : [Pseudo]",
       },
     ];
   }
