@@ -1,4 +1,4 @@
-const { STAFF_ROLE_ID } = require("../config");
+const { AFFECTATION_ROLE_ID } = require("../config");
 
 const compact = (values) => [...new Set(values.filter(Boolean))];
 
@@ -7,7 +7,7 @@ function request(definition) {
   // masquer une option tant que tous ses IDs obligatoires ne sont pas remplis.
   const requiredConfigIds = definition.requiredConfigIds || [];
   return {
-    reviewerRoleId: STAFF_ROLE_ID,
+    reviewerRoleId: AFFECTATION_ROLE_ID,
     grantRoleIds: [],
     removeRoleIds: [],
     requireAllRoleIds: [],

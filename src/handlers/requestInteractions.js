@@ -1,7 +1,7 @@
 const { MessageFlags } = require("discord.js");
 const { getRequest } = require("../catalog");
 const { requestLocks, getSubmissionCooldownRemaining } = require("../locks");
-const { canProcessRequest } = require("../permissions");
+const { canProcessRequest, getProcessDenial } = require("../permissions");
 const {
   validateRequestEligibility,
   getMemberBranches,
@@ -127,8 +127,8 @@ async function handleRequestInteraction(client, interaction) {
     const request = getRequest(requestKey);
     if (!request) return true;
 
-    if (!canProcessRequest(interaction.member, request)) {
-      await interaction.reply({ content: "⛔ Accès refusé.", flags: MessageFlags.Ephemeral });
+    if (!canProcessRequest(interaction.member, request, userId)) {
+      await interaction.reply({ content: getProcessDenial(interaction.member, request, userId), flags: MessageFlags.Ephemeral });
       return true;
     }
 
@@ -217,8 +217,8 @@ async function handleRequestInteraction(client, interaction) {
     const request = getRequest(requestKey);
     if (!request) return true;
 
-    if (!canProcessRequest(interaction.member, request)) {
-      await interaction.reply({ content: "⛔ Accès refusé.", flags: MessageFlags.Ephemeral });
+    if (!canProcessRequest(interaction.member, request, userId)) {
+      await interaction.reply({ content: getProcessDenial(interaction.member, request, userId), flags: MessageFlags.Ephemeral });
       return true;
     }
 
@@ -300,8 +300,8 @@ async function handleRequestInteraction(client, interaction) {
   if (interaction.isModalSubmit() && interaction.customId.startsWith("reject_reason:")) {
     const [, requestKey, userId, messageId] = interaction.customId.split(":");
     const request = getRequest(requestKey);
-    if (!request || !canProcessRequest(interaction.member, request)) {
-      await interaction.reply({ content: "⛔ Accès refusé.", flags: MessageFlags.Ephemeral });
+    if (!request || !canProcessRequest(interaction.member, request, userId)) {
+      await interaction.reply({ content: getProcessDenial(interaction.member, request, userId), flags: MessageFlags.Ephemeral });
       return true;
     }
 

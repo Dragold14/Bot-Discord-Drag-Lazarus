@@ -12,7 +12,7 @@ const GROUPS = {
   other: {
     title: "🔹 // AUTRES ACCRÉDITATIONS",
     description:
-      "Demandes hors parcours PHYS / PTOL : Recherche & Développement, Haut Commandement, rôle Staff et demande particulière.",
+      "Demandes hors parcours PHYS / PTOL : Recherche & Développement, Haut Commandement, rôle Staff, Officier d\'Affectation et demande particulière.",
     placeholder: "Sélectionner une autre demande…",
     accentColor: COLORS.OTHER_YELLOW,
   },

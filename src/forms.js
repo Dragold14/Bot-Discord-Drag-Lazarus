@@ -32,6 +32,32 @@ function getRequestFields(request, context = {}) {
   }
 
   // ============================================================
+  // OFFICIER D'AFFECTATION
+  // ============================================================
+
+  if (request.formType === "affectation") {
+    return [
+      {
+        id: "nom_prenom",
+        label: "Prénom / Nom",
+        placeholder: "Ex : [Simon Riley]",
+      },
+      {
+        id: "matricule",
+        label: "Matricule",
+        placeholder: "Ex : [0000]",
+      },
+      {
+        id: "justification",
+        label: "Motivation / justification",
+        placeholder: "Pourquoi souhaitez-vous devenir Officier d'Affectation ?",
+        style: "paragraph",
+        maxLength: 1200,
+      },
+    ];
+  }
+
+  // ============================================================
   // STAFF
   // ============================================================
 

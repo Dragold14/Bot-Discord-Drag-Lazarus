@@ -222,7 +222,7 @@ function buildSecondaryBlock() {
 
             "",
 
-            "**Disponibles :** R&D, Haut Commandement, rôle Staff et demande particulière.",
+            "**Disponibles :** R&D, Haut Commandement, rôle Staff, Officier d'Affectation et demande particulière.",
           ].join("\n")
         )
       );

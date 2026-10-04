@@ -1,4 +1,10 @@
-const {COLORS, EMOJI_IDS, STAFF_ROLE_ID, HC_STAFF_ROLE_ID} = require("../config");
+const {
+  COLORS,
+  EMOJI_IDS,
+  STAFF_ROLE_ID,
+  HC_STAFF_ROLE_ID,
+  AFFECTATION_GRANT_ROLE_ID,
+} = require("../config");
 const { request } = require("./factory");
 const { GROUPS } = require("./groups");
 const { MAJOR_REQUESTS } = require("./major");
@@ -20,8 +26,25 @@ const REQUESTS = {
     targetRoleId: STAFF_ROLE_ID,
     grantRoleIds: [STAFF_ROLE_ID],
     requiredConfigIds: [STAFF_ROLE_ID],
-    reviewerRoleId: HC_STAFF_ROLE_ID || STAFF_ROLE_ID,
+    reviewerRoleId: HC_STAFF_ROLE_ID || null,
     formType: "staff",
+  }),
+
+  // Le rôle donné est strictement AFFECTATION_ROLE_ID (sans repli sur Staff) :
+  // tant que la variable est vide, la demande reste masquée.
+  affectation: request({
+    key: "affectation",
+    label: "Officier d'Affectation",
+    code: "CLEARANCE // AFFECTATION",
+    group: "other",
+    category: "staff",
+    emoji: "📋",
+    accentColor: COLORS.STAFF_RED,
+    targetRoleId: AFFECTATION_GRANT_ROLE_ID,
+    grantRoleIds: [AFFECTATION_GRANT_ROLE_ID],
+    requiredConfigIds: [AFFECTATION_GRANT_ROLE_ID],
+    reviewerRoleId: HC_STAFF_ROLE_ID || null,
+    formType: "affectation",
   }),
 
   autre: request({

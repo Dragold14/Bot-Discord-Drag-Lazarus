@@ -12,6 +12,7 @@ const client = new Client({
 const ROLES = [
   // STAFF
   ["STAFF_ROLE_ID", "Staff Test"],
+  ["AFFECTATION_ROLE_ID", "Officier d'Affectation Test"],
 
   // RANG PHYS
   ["ROLE_SEPARATOR_RANK_PHYS_ID", "✦────Rang Physique────✦"],

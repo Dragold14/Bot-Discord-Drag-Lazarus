@@ -17,6 +17,10 @@ const GUILD_ID = env("GUILD_ID");
 const REQUEST_CHANNEL_ID = env("REQUEST_CHANNEL_ID");
 const STAFF_ROLE_ID = env("STAFF_ROLE_ID");
 const HC_STAFF_ROLE_ID = env("HC_STAFF_ROLE_ID");
+// Officier d'Affectation : joueurs autorisés à valider les demandes de rôles.
+// Si la variable est vide, on retombe sur STAFF_ROLE_ID (ancien comportement).
+const AFFECTATION_GRANT_ROLE_ID = env("AFFECTATION_ROLE_ID");
+const AFFECTATION_ROLE_ID = AFFECTATION_GRANT_ROLE_ID || STAFF_ROLE_ID;
 
 const requiredVariables = {
   DISCORD_TOKEN,
@@ -60,9 +64,7 @@ const ROLE_IDS = {
     divisionPtol: env("ROLE_SEPARATOR_DIV_PTOL_ID"),
     specPhys: env("ROLE_SEPARATOR_SPEC_PHYS_ID"),
     specPtol: env("ROLE_SEPARATOR_SPEC_PTOL_ID"),
-    rd: env("ROLE_SEPARATOR_RD_ID"),
     extra: env("ROLE_SEPARATOR_EXTRA_ID"),
-    hc: env("ROLE_SEPARATOR_HC_ID"),
   },
 
   ranks: {
@@ -129,6 +131,8 @@ module.exports = {
   REQUEST_CHANNEL_ID,
   STAFF_ROLE_ID,
   HC_STAFF_ROLE_ID,
+  AFFECTATION_ROLE_ID,
+  AFFECTATION_GRANT_ROLE_ID,
   COLORS,
   ROLE_IDS,
   EMOJI_IDS,

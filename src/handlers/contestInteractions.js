@@ -2,7 +2,7 @@ const { MessageFlags } = require("discord.js");
 const { getRequest } = require("../catalog");
 const { contestState, saveContestState } = require("../state");
 const { contestLocks } = require("../locks");
-const { canProcessRequest, canUseBureauMessaging } = require("../permissions");
+const { canProcessRequest, getProcessDenial, canUseBureauMessaging } = require("../permissions");
 const { buildContestKey, formatDateTimeFR, getField, safeText, quoteMessage } = require("../helpers");
 const {
   getFreshRequestMessage,
@@ -196,8 +196,8 @@ async function handleContestDecision(client, interaction, accepted) {
   }
 
   const request = getRequest(record.type);
-  if (!request || !canProcessRequest(interaction.member, request)) {
-    await interaction.reply({ content: "⛔ Accès refusé.", flags: MessageFlags.Ephemeral });
+  if (!request || !canProcessRequest(interaction.member, request, userId)) {
+    await interaction.reply({ content: getProcessDenial(interaction.member, request, userId), flags: MessageFlags.Ephemeral });
     return;
   }
 
@@ -324,8 +324,8 @@ async function handleContestInteraction(client, interaction) {
       return true;
     }
 
-    if (!canProcessRequest(interaction.member, request)) {
-      await interaction.reply({ content: "⛔ Accès refusé.", flags: MessageFlags.Ephemeral });
+    if (!canProcessRequest(interaction.member, request, userId)) {
+      await interaction.reply({ content: getProcessDenial(interaction.member, request, userId), flags: MessageFlags.Ephemeral });
       return true;
     }
 
@@ -354,7 +354,7 @@ async function handleContestInteraction(client, interaction) {
       record.status !== "open" ||
       !request ||
       !canUseBureauMessaging(interaction.member) ||
-      !canProcessRequest(interaction.member, request)
+      !canProcessRequest(interaction.member, request, userId)
     ) {
       await interaction.reply({ content: "⛔ Ce réexamen n'est pas accessible.", flags: MessageFlags.Ephemeral });
       return true;

@@ -4,7 +4,7 @@ const {
   ButtonBuilder,
   ButtonStyle,
 } = require("discord.js");
-const { COLORS } = require("../config");
+const { COLORS, HC_STAFF_ROLE_ID } = require("../config");
 const { getRequestFields } = require("../forms");
 const {
   text,
@@ -58,6 +58,8 @@ function buildStaffRequestComponent(interaction, request, context = {}) {
     routeUpper.includes("SPECIAL")
   ) {
     requestType = "Demande de spécialisation";
+  } else if (routeUpper.includes("AFFECTATION")) {
+    requestType = "Accréditation Officier d'Affectation";
   } else if (routeUpper.includes("STAFF")) {
     requestType = "Accréditation Staff";
   } else if (
@@ -235,9 +237,14 @@ function buildStaffRequestComponent(interaction, request, context = {}) {
     .addTextDisplayComponents(
       text(
         [
-          request.reviewerRoleId
-            ? `**Personnel habilité :** <@&${request.reviewerRoleId}>`
-            : "**Personnel habilité :** Administrateurs",
+          (() => {
+            const reviewers = [
+              ...new Set([request.reviewerRoleId, HC_STAFF_ROLE_ID].filter(Boolean)),
+            ];
+            return reviewers.length
+              ? `**Personnel habilité :** ${reviewers.map((id) => `<@&${id}>`).join(" ")}`
+              : "**Personnel habilité :** Administrateurs";
+          })(),
           "",
           "`CLASSIFICATION : INTERNE`",
           "`BUREAU DES ACCRÉDITATIONS // ARCHIVES`",
